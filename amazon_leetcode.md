@@ -1,3 +1,10 @@
+<!-- GFM-TOC -->
+* [973. K Closest Points to Origin](#973-k-closest-points-to-origin)
+* [146. LRU Cache](#146-lru-cache)
+* [1. Two Sum](#1-two-sum)
+* [200. Number of Islands](#200-number-of-islands)
+<!-- GFM-TOC -->
+
 # 973. K Closest Points to Origin
 
 ## 法1: O(nlogn) 排序
