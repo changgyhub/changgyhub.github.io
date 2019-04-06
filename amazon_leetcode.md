@@ -3,11 +3,17 @@
 * [146. LRU Cache](#146-lru-cache)
 * [1. Two Sum](#1-two-sum)
 * [200. Number of Islands](#200-number-of-islands)
+* [5. Longest Palindromic Substring](#5-longest-palindromic-substring)
+* [819. Most Common Word](#819-most-common-word)
+* [138. Copy List with Random Pointer](#138-copy-list-with-random-pointer)
+* [21. Merge Two Sorted Lists](#21-merge-two-sorted-lists)
+* [103. Binary Tree Zigzag Level Order Traversal](#103-binary-tree-zigzag-level-order-traversal)
+* [2. Add Two Numbers](#2-add-two-numbers)
 <!-- GFM-TOC -->
 
 # 973. K Closest Points to Origin
 
-## 法1: O(nlogn) 排序
+### 法1: O(nlogn) 排序
 
 ```java
 public int[][] kClosest(int[][] points, int K) {
@@ -16,7 +22,7 @@ public int[][] kClosest(int[][] points, int K) {
 }
 ```
 
-## 法2: O(nlogk) priority queue
+### 法2: O(nlogn) [priority queue](#http://www.cnblogs.com/vamei/archive/2013/03/20/2966612.html)
 
 ```java
 public int[][] kClosest(int[][] points, int K) {
@@ -38,7 +44,27 @@ public int[][] kClosest(int[][] points, int K) {
     return ans;
 }
 ```
-## 法3: O(n) quick selection
+
+### 法3: O(nlogn) TreeMap
+```java
+public int[][] kClosest(int[][] points, int K) {
+    Map<Integer,Integer> orderMap = new TreeMap<Integer,Integer>();
+    int[][] arr = new int[K][2];
+    for (int i=0; i<points.length; i++){
+        int sum = Math.abs(points[i][0]) * Math.abs(points[i][0]) +Math.abs(points[i][1]) * Math.abs(points[i][1]);
+        orderMap.put(sum,i);
+    }
+    int count=0;
+    for (Integer i: orderMap.keySet()) {
+        arr[count] = points[orderMap.get(i)];
+        count++;
+        if(count==K){break;}
+    }
+    return arr;
+}
+```
+
+### 法4: O(n) quick selection
 
 ```java
 class Solution {
@@ -97,7 +123,7 @@ class Solution {
 
 # 146. LRU Cache
 
-## 法1: 采用LinkedHashMap
+### 法1: 采用LinkedHashMap
 
 ```java
 public class LRUCache extends LinkedHashMap<Integer, Integer> {
@@ -123,7 +149,7 @@ public class LRUCache extends LinkedHashMap<Integer, Integer> {
 }
 ```
 
-## 法2: 自己写一个，HashMap with Entry<K, V> being linked.
+### 法2: 自己写一个，HashMap with Entry<K, V> being linked.
 
 ```java
 Map<Integer, Node> map = new HashMap<>();
@@ -195,7 +221,7 @@ class Node {
 
 # 1. Two Sum
 
-## 法1: Hashmap
+### 法1: Hashmap
 ```java
 public int[] twoSum(int[] nums, int target) {
     Map<Integer, Integer> map = new HashMap<>();
@@ -225,7 +251,7 @@ Output:
 1
 ```
 
-## 法1: DFS
+### 法1: DFS
 ```java
 public class NumberofIslands {
     static int[] dx = {-1,0,0,1};
@@ -254,3 +280,228 @@ public class NumberofIslands {
 }
 ```
 
+# 5. Longest Palindromic Substring
+找到一个字符串里的最长的、对称的substring
+比如"babad"的结果是"aba"
+
+### 法1: dynamic programming 动态规划，dp[i][j] = dp[i + 1][j - 1] + 0/1
+
+```java
+public String longestPalindrome(String s) {
+  int n = s.length();
+  String res = null;
+    
+  boolean[][] dp = new boolean[n][n];
+    
+  for (int i = n - 1; i >= 0; i--) {
+    for (int j = i; j < n; j++) {
+      dp[i][j] = s.charAt(i) == s.charAt(j) && (j - i < 3 || dp[i + 1][j - 1]);
+            
+      if (dp[i][j] && (res == null || j - i + 1 > res.length())) {
+        res = s.substring(i, j + 1);
+      }
+    }
+  }
+    
+  return res;
+}
+```
+
+# 819. Most Common Word
+给一个句子，找到这个句子里出现最多的、且没有被ban掉的词
+举例
+```
+Input: 
+paragraph = "Bob hit a ball, the hit BALL flew far after it was hit."
+banned = ["hit"]
+Output: "ball"
+```
+### 法1: HashMap
+```java
+public String mostCommonWord(String paragraph, String[] banned) {
+    Map<String, Integer> wordAndCount = new HashMap<String, Integer>();
+    Set<String> bansSet = new HashSet<>(Arrays.asList(banned));
+    //[!?,';] is the possible punctuations for this input, can also use '\\pP' instead for all of the punctuations.
+    String[] words = paragraph.replaceAll("[!?',;.]","").toLowerCase().split(" ");
+    int max = 0;
+    String res = "";
+    for(String word:words){
+        if(bansSet.contains(word)) continue;
+    // use getOrDefault - Java8 new default function from Map interface
+        wordAndCount.put(word, wordAndCount.getOrDefault(word, 0) + 1);
+        int count = wordAndCount.get(word);
+        if( count > max) {
+            max = count;
+            res = word;
+        }
+    }
+
+    return res;
+}
+```
+
+# 138. Copy List with Random Pointer
+链表的每个点多了一个random pointer，现在想完全复制这一个链表
+
+### 法1: HashMap
+```java
+public RandomListNode copyRandomList(RandomListNode head) {
+  if (head == null) return null;
+  
+  Map<RandomListNode, RandomListNode> map = new HashMap<RandomListNode, RandomListNode>();
+  
+  // loop 1. copy all the nodes
+  RandomListNode node = head;
+  while (node != null) {
+    map.put(node, new RandomListNode(node.label));
+    node = node.next;
+  }
+  
+  // loop 2. assign next and random pointers
+  node = head;
+  while (node != null) {
+    map.get(node).next = map.get(node.next);
+    map.get(node).random = map.get(node.random);
+    node = node.next;
+  }
+  
+  return map.get(head);
+}
+```
+
+# 21. Merge Two Sorted Lists
+
+### 法1: 迭代
+```java
+public ListNode mergeTwoLists1(ListNode l1, ListNode l2) {
+    ListNode p, dummy = new ListNode(0);
+    p = dummy;
+    while (l1 != null && l2 != null) {
+        if (l1.val < l2.val) {
+            p.next = l1;
+            l1 = l1.next;
+        } else {
+            p.next = l2;
+            l2 = l2.next;
+        }
+        p = p.next;
+    }
+    p.next = (l1==null)?l2:l1;
+    return dummy.next;
+}
+```
+
+### 法2: 递归
+```java
+public ListNode mergeTwoLists(ListNode l1, ListNode l2) {
+    if (l1 == null || l2 == null) {
+        return l1==null?l2:l1;
+    }
+    if (l1.val > l2.val) {
+        return mergeTwoLists(l2, l1);
+    }
+    l1.next = mergeTwoLists(l1.next, l2);
+    return l1;
+}
+```
+
+# 103. Binary Tree Zigzag Level Order Traversal
+输入
+```
+    3
+   / \
+  9  20
+    /  \
+   15   7
+```
+输出
+```
+[
+  [3],
+  [20,9],
+  [15,7]
+]
+```
+### 法1: 用LinkedList实现Queue来做BFS，方便两头插入
+```java
+public List<List<Integer>> zigzagLevelOrder(TreeNode root) {
+    List<List<Integer>> list = new LinkedList<>();
+    if(root == null) return list;
+    Queue<TreeNode> q = new LinkedList<>();
+    q.add(root);
+    while(!q.isEmpty()){
+        int size = q.size();
+        LinkedList<Integer> curr_level = new LinkedList<>();
+        for(int i=0; i < size; i++){
+            TreeNode curr = q.remove();
+            // 考虑单数层还是奇数层
+            if(list.size() % 2 == 0)
+                curr_level.add(curr.val);
+            else       
+                curr_level.addFirst(curr.val);
+            
+            if(curr.left != null) q.add(curr.left);
+            if(curr.right != null) q.add(curr.right);
+                
+        }
+        list.add(curr_level);
+    }
+    return list;
+}
+```
+
+# 2. Add Two Numbers
+给两个反序的链表，求和，如342 + 465 = 807:
+```
+(2 -> 4 -> 3) + (5 -> 6 -> 4) = 7 -> 0 -> 8
+```
+
+### 法1: 迭代
+```java
+public ListNode addTwoNumbers(ListNode L1, ListNode L2) {
+    ListNode dummy = new ListNode(0), current = dummy;
+    int carry = 0;
+    
+    while(L1 != null || L2 != null || carry > 0) {
+        int sum = carry;
+        
+        if(L1 != null) {sum += L1.val; L1 = L1.next;}
+        if(L2 != null) {sum += L2.val; L2 = L2.next;}
+        
+        current.next = new ListNode(sum % 10);
+        current = current.next;
+        carry = sum / 10;
+    }
+    return dummy.next;
+}
+```
+
+### 法2: 递归
+```java
+public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+    return helper(l1,l2,0);
+}
+private ListNode helper(ListNode l1, ListNode l2, int carry){
+    if(l1 == null && l2 == null){
+        if(carry == 1)  return new ListNode(1);
+        else    return null;
+    }
+    
+    int sum = carry;
+    sum = (l1 == null)?sum:sum+l1.val;
+    sum = (l2 == null)?sum:sum+l2.val;
+    
+    carry = sum / 10;
+    sum = sum % 10;
+    
+    ListNode node = new ListNode(sum);
+    if(l1 == null)  
+        node.next = helper(l1,l2.next,carry);
+    else if(l2 == null)
+        node.next = helper(l1.next,l2,carry);
+    else
+        node.next = helper(l1.next,l2.next,carry);
+    return node;
+    
+}
+```
