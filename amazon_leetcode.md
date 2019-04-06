@@ -287,7 +287,7 @@ public class NumberofIslands {
 找到一个字符串里的最长的、对称的substring
 比如"babad"的结果是"aba"
 
-### 法1: dynamic programming 动态规划，dp[i][j] = dp[i + 1][j - 1] + 0/1
+### 法1: dynamic programming 动态规划，dp[i][j] = dp[i + 1][j - 1] && s.charAt(i) == s.charAt(j)
 
 ```java
 public String longestPalindrome(String s) {
