@@ -9,6 +9,9 @@
 * [21. Merge Two Sorted Lists](#21-merge-two-sorted-lists)
 * [103. Binary Tree Zigzag Level Order Traversal](#103-binary-tree-zigzag-level-order-traversal)
 * [2. Add Two Numbers](#2-add-two-numbers)
+* [763. Partition Labels](#763-partition-labels)
+* [127. Word Ladder](#127-word-ladder)
+* [139. Word Break](#139-word-break)
 <!-- GFM-TOC -->
 
 # 973. K Closest Points to Origin
@@ -503,5 +506,110 @@ private ListNode helper(ListNode l1, ListNode l2, int carry){
         node.next = helper(l1.next,l2.next,carry);
     return node;
     
+}
+```
+
+# 763. Partition Labels
+给定一个字符串，尽量分成不同的部分，使得每个部分里的字符不在别的部分出现，比如
+```
+Input: S = "ababcbacadefegdehijhklij"
+Output: [9,7,8] ("ababcbaca", "defegde", "hijhklij")
+```
+
+### 法1: 用一个array记录每个字符最后一次出现的位置
+```java
+public List<Integer> partitionLabels(String S) {
+    List<Integer> res = new ArrayList();
+    int[] rightMostPos = new int[26];
+    Arrays.fill(rightMostPos, -1);
+    
+    for (int i = 0; i < S.length(); ++i) {
+        rightMostPos[S.charAt(i) - 'a'] = i;
+    }
+    
+    int currRight = -1, count = 0;
+    for (int i = 0; i < S.length(); ++i) {
+        count++;
+        currRight = Math.max(currRight, rightMostPos[S.charAt(i) - 'a']);
+         if (i == currRight) {
+            res.add(count);
+            count = 0;
+        }
+    }
+    
+    return res;
+}
+```
+
+# 127. Word Ladder
+给定两个词和一个字典，每次只可以变词的一个单词且变后的词要在词典出现过，问最少几次可以把第一个词变到第二个词，比如
+```
+beginWord = "hit",
+endWord = "cog",
+wordList = ["hot","dot","dog","lot","log","cog"]
+
+Output: 5 ("hit" -> "hot" -> "dot" -> "dog" -> "cog")
+```
+
+### 法1: BFS
+```java
+public int ladderLength(String beginWord, String endWord, List<String> wordList) {
+    if(beginWord==null || endWord==null || beginWord.equals(endWord) || !wordList.contains(endWord)) return 0;
+    int len = 1;
+    Set<String> dict = new HashSet<>(wordList);
+    Queue<String> queue = new LinkedList<>();
+    Set<String> visited = new HashSet<>();
+    queue.offer(beginWord); visited.add(beginWord);
+    while(!queue.isEmpty()){
+        int levelSize = queue.size();
+        for(int s=0;s<levelSize;s++){
+            String cur = queue.poll();
+            for(int i=0;i<cur.length();i++){
+                for(char c='a';c<='z';c++){
+                    char[] carr = cur.toCharArray();
+                    char c1 = carr[i];
+                    carr[i] = c;
+                    String temp = new String(carr);
+                   
+                    if(temp.equals(endWord)){
+                         System.out.println("temp "+temp +" endWord  "+endWord);
+                         return len+1;
+                    } 
+                    if(!visited.contains(temp) && dict.contains(temp)){
+                        visited.add(temp); queue.offer(temp);
+                    }
+                    carr[i] = c1;
+                }
+            }               
+        }
+        len++;
+    }
+    
+    return 0;
+}
+```
+
+# 139. Word Break
+给定一个字符串和一个字典，回答是否字符串能用字典里的词组成
+
+### 法1：这是一个完全背包问题，可以用DP
+```java
+public boolean wordBreak(String s, Set<String> wordDict) {
+    if (s == null || s.isEmpty()) {
+        return false;
+    }
+    
+    int n = s.length();
+    boolean[] breakable = new boolean[n + 1];
+    breakable[0] = true;
+    for (int i = 1; i <= n; i++) {
+        for (int j = i - 1; j >= 0; j--) {
+            if (breakable[j] && wordDict.contains(s.substring(j, i))) {
+                breakable[i] = true;
+                break;
+            }
+        }
+    }
+    return breakable[n];
 }
 ```
